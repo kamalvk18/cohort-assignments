@@ -1,0 +1,1 @@
+This is a sample write operation done using fs module in node js

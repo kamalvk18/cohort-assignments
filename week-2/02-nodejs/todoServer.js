@@ -41,9 +41,59 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
+  const {v4: uuid} = require('uuid')
   
   const app = express();
   
   app.use(bodyParser.json());
+
+  let todos = []
+
+  app.get('/todos', (req, res) => {
+    res.status(200).json(todos)
+  })
+
+  app.get('/todos/:id', (req, res) => {
+    const foundTodo = todos.find(t => t.id === req.params.id)
+    if (foundTodo) res.status(200).json(foundTodo)
+    else res.status(404).json('Todo not found')
+  })
+
+  app.post('/todos', (req, res) => {
+    const id = uuid()
+    const newTodo = {
+      'id': id,
+      'title': req.body.title,
+      'description':  req.body.description,
+      'completed': req.body.completed
+    }
+
+    todos.push(newTodo)
+    res.status(201).json(newTodo)
+  })
+
+  app.put('/todos/:id', (req, res) => {
+    const todoIndex = todos.findIndex(t => t.id === req.params.id)
+    if (todoIndex == -1) res.status(404).json('Todo not found')
+    else {
+      todos[todoIndex].title = req.body.title
+      todos[todoIndex].description = req.body.description
+      todos[todoIndex].completed = req.body.completed
+      res.status(200).json(todos[todoIndex].id)
+    }
+  })  
   
+  app.delete('/todos/:id', (req, res) => {
+    const todoIndex = todos.findIndex(t => t.id === req.params.id);
+    if (todoIndex == -1) res.status(404).json('Todo not found')
+    else {
+      todos.splice(todoIndex, 1);
+      res.status(200).send();
+    }
+  });
+  
+  app.use((req, res, next) => {
+    res.status(404).send();
+  });
+
   module.exports = app;
